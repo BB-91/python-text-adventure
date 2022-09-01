@@ -25,22 +25,22 @@ story = {
     ],
 }
 
-def get_prompt_sentences(storyPoint: Choice) -> list[str]:
-    return story[storyPoint][:-1]
+def get_prompt_sentences(story_point: Choice) -> list[str]:
+    return story[story_point][:-1]
 
-def get_choices(storyPoint: Choice) -> list[Choice]:
-    return story[storyPoint][-1]
+def get_choices(story_point: Choice) -> list[Choice]:
+    return story[story_point][-1]
 
-def get_choice_names(storyPoint: Choice) -> list[str]:
-    return list(map(lambda choice: choice.name, get_choices(storyPoint)))  
+def get_choice_names(story_point: Choice) -> list[str]:
+    return list(map(lambda choice: choice.name, get_choices(story_point)))  
 
-def get_all_storyPoints() -> list[Choice]:
+def get_all_story_points() -> list[Choice]:
     return story.keys()
 
 def get_all_prompt_sentences() -> list[str]:
     all_prompt_sentences = []
-    for storyPoint in get_all_storyPoints():
-        all_prompt_sentences += get_prompt_sentences(storyPoint)
+    for story_point in get_all_story_points():
+        all_prompt_sentences += get_prompt_sentences(story_point)
     return all_prompt_sentences
 
 def get_longest_string_length(strings: list[str]):
@@ -72,23 +72,23 @@ def get_bottom_border() -> str:
 def get_bordered_choice_name(choice_name: str):
     return "[ " + choice_name + " ]"
 
-def get_bordered_choices(storyPoint: Choice):
+def get_bordered_choices(story_point: Choice):
     bordered_choices = []
     
-    for choice_name in get_choice_names(storyPoint):
+    for choice_name in get_choice_names(story_point):
         bordered_choices.append(get_bordered_choice_name(choice_name))
     
     return get_bordered_string(CHOICE_SEPARATOR.join(bordered_choices))
 
-def get_bordered_prompt(storyPoint: Choice) -> str:
+def get_bordered_prompt(story_point: Choice) -> str:
     bordered_lines = [get_top_border()]
-    sentences = get_prompt_sentences(storyPoint)
+    sentences = get_prompt_sentences(story_point)
 
     for sentence in sentences:
         bordered_lines.append(get_bordered_string(sentence))  
 
     bordered_lines.append(get_empty_bordered_line())
-    bordered_lines.append(get_bordered_choices(storyPoint))
+    bordered_lines.append(get_bordered_choices(story_point))
     bordered_lines.append(get_bottom_border())
 
     return "\n".join(bordered_lines)
