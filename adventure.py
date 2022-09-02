@@ -1,4 +1,5 @@
 from enum import Enum, unique, auto
+import os
 
 @unique
 class Choice(Enum):
@@ -7,7 +8,6 @@ class Choice(Enum):
     WEST = "Go West"
     FOLLOW_THE_SOUND = "Find the brook"
     FOLLOW_THE_SMOKE = "Follow the smoke"
-
 
 story = {
     Choice.START: [
@@ -72,14 +72,14 @@ def get_empty_bordered_line() -> str:
 def get_bottom_border() -> str:
     return get_empty_bordered_line() + "\n" + get_top_border()
 
-def get_bordered_choice_name(choice_name: str):
-    return "[ " + choice_name + " ]"
+def get_bordered_choice_value(choice_value: str, hotkey: str) -> str:
+    return f"[ {hotkey}: {choice_value} ]"
 
-def get_bordered_choices(story_point: Choice):
+def get_bordered_choices(story_point: Choice) -> str:
     bordered_choices = []
-    
-    for choice_value in get_choice_values_from_story_point(story_point):
-        bordered_choices.append(get_bordered_choice_name(choice_value))
+
+    for index, choice_value in enumerate(get_choice_values_from_story_point(story_point), 1):
+        bordered_choices.append(get_bordered_choice_value(choice_value, str(index)))
     
     return get_bordered_string(CHOICE_SEPARATOR.join(bordered_choices))
 
@@ -96,19 +96,33 @@ def get_bordered_prompt(story_point: Choice) -> str:
 
     return "\n".join(bordered_lines)
 
+def clear_terminal() -> None:
+    # https://stackoverflow.com/questions/2084508/clear-terminal-in-python
+    os.system('cls' if os.name == 'nt' else 'clear')
 
-def prompt_user(story_point):
+def prompt_user(story_point) -> None:
     choices = get_choices(story_point)
     choice_values = get_choice_values_from_choices(choices)
-    lower_choice_names = list(map(lambda choice_name: choice_name.lower(), choice_values))
+    lower_choice_values = list(map(lambda choice_value: choice_value.lower(), choice_values))
 
     prompt = get_bordered_prompt(story_point)
     decision = input(prompt + "\n").lower()
 
-    if decision in lower_choice_names:
-        index = lower_choice_names.index(decision)
+    index = -1
+    clear_terminal()
+
+    if decision in lower_choice_values:
+        index = lower_choice_values.index(decision)
+    elif decision.isdigit():
+        index = int(decision) - 1
+
+    
+    if index >= 0:
         current_story_point = choices[index]
         prompt_user(current_story_point)
+    else:
+       prompt_user(story_point)
+
 
 def begin_adventure() -> None:
     prompt_user(current_story_point)
@@ -117,7 +131,8 @@ def print_pretty(arr: list) -> None:
     for value in arr:
         print(value)
 
-def main():
+def main() -> None:
+    clear_terminal()
     begin_adventure()
 
 main()
