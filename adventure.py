@@ -4,22 +4,61 @@ import os
 @unique
 class Choice(Enum):
     START = "START"
-    EAST = "Go East"
-    WEST = "Go West"
-    FOLLOW_THE_SOUND = "Find the brook"
+
+    GO_EAST = "Go East"
+    GO_WEST = "Go West"
+
+    FIND_THE_BROOK = "Find the brook"
     FOLLOW_THE_SMOKE = "Follow the smoke"
+
+    RETRIEVE_THE_RING = "Retrieve it"
+    LEAVE_THE_RING = "Leave it"
+
+inventory = []
 
 story = {
     Choice.START: [
         "You wake up in a strange forest.",
         "Ahead lies a path branching east and west.",
-        [Choice.EAST, Choice.WEST]
+        [Choice.GO_EAST, Choice.GO_WEST]
     ],
 
-    Choice.EAST: [
+    Choice.GO_EAST: [
         "Walking east, you hear the faint sound of a brook.",
         "In the distance, you see a billow of smoke.",
-        [Choice.FOLLOW_THE_SOUND, Choice.FOLLOW_THE_SMOKE]
+        [Choice.FIND_THE_BROOK, Choice.FOLLOW_THE_SMOKE]
+    ],
+
+
+    Choice.GO_WEST: [
+        "Walking west, you trip over a rock and suffer a mortal wound.",
+        "You died. Game over.",
+        []
+    ],
+
+    Choice.FIND_THE_BROOK: [
+        "You find the brook by following the sound of the water.",
+        "While drinking from it, you see a ring lodged between some pebbles.",
+        [Choice.RETRIEVE_THE_RING, Choice.LEAVE_THE_RING]
+    ],
+
+    Choice.FOLLOW_THE_SMOKE: [
+        "You follow the smoke and wind up in a raging fire.",
+        "You died. Game over.",
+        []
+    ],
+
+    Choice.RETRIEVE_THE_RING: [
+        "You retrieve the Ring of Power the conquer all of Middle Earth.",
+        "You win!",
+        []
+    ],
+
+    Choice.LEAVE_THE_RING: [
+        "You leave the ring.",
+        "As you walk away, a wraith takes the Ring of Power.",
+        "The world is plunged into darkness forever. Game over.",
+        []
     ],
 }
 
@@ -78,8 +117,11 @@ def get_bordered_choice_value(choice_value: str, hotkey: str) -> str:
 def get_bordered_choices(story_point: Choice) -> str:
     bordered_choices = []
 
-    for index, choice_value in enumerate(get_choice_values_from_story_point(story_point), 1):
-        bordered_choices.append(get_bordered_choice_value(choice_value, str(index)))
+    choice_values = get_choice_values_from_story_point(story_point)
+
+    if (len(choice_values) > 0):
+        for index, choice_value in enumerate(choice_values):
+            bordered_choices.append(get_bordered_choice_value(choice_value, str(index + 1)))
     
     return get_bordered_string(CHOICE_SEPARATOR.join(bordered_choices))
 
