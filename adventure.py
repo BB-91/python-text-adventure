@@ -14,7 +14,8 @@ class Choice(Enum):
     RETRIEVE_THE_RING = "Retrieve it"
     LEAVE_THE_RING = "Leave it"
 
-inventory = []
+    RETRY = "Retry"
+    QUIT = "Quit"
 
 story = {
     Choice.START: [
@@ -33,7 +34,7 @@ story = {
     Choice.GO_WEST: [
         "Walking west, you trip over a rock and suffer a mortal wound.",
         "You died. Game over.",
-        []
+        [Choice.RETRY, Choice.QUIT]
     ],
 
     Choice.FIND_THE_BROOK: [
@@ -45,20 +46,20 @@ story = {
     Choice.FOLLOW_THE_SMOKE: [
         "You follow the smoke and wind up in a raging fire.",
         "You died. Game over.",
-        []
+        [Choice.RETRY, Choice.QUIT]
     ],
 
     Choice.RETRIEVE_THE_RING: [
         "You retrieve the Ring of Power the conquer all of Middle Earth.",
         "You win!",
-        []
+        [Choice.RETRY, Choice.QUIT]
     ],
 
     Choice.LEAVE_THE_RING: [
         "You leave the ring.",
         "As you walk away, a wraith takes the Ring of Power.",
         "The world is plunged into darkness forever. Game over.",
-        []
+        [Choice.RETRY, Choice.QUIT]
     ],
 }
 
@@ -142,36 +143,53 @@ def clear_terminal() -> None:
     # https://stackoverflow.com/questions/2084508/clear-terminal-in-python
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def prompt_user(story_point) -> None:
-    choices = get_choices(story_point)
-    choice_values = get_choice_values_from_choices(choices)
-    lower_choice_values = list(map(lambda choice_value: choice_value.lower(), choice_values))
-
-    prompt = get_bordered_prompt(story_point)
-    decision = input(prompt + "\n").lower()
-
-    index = -1
-    clear_terminal()
-
-    if decision in lower_choice_values:
-        index = lower_choice_values.index(decision)
-    elif decision.isdigit():
-        index = int(decision) - 1
-
-    
-    if index >= 0:
-        current_story_point = choices[index]
-        prompt_user(current_story_point)
+def prompt_user(story_point: Choice) -> None:
+    if story_point == Choice.RETRY:
+        prompt_user(Choice.START)
+    elif story_point == Choice.QUIT:
+        quit()
     else:
-       prompt_user(story_point)
+        choices = get_choices(story_point)
+        choice_values = get_choice_values_from_choices(choices)
+        lower_choice_values = list(map(lambda choice_value: choice_value.lower(), choice_values))
+
+        prompt = get_bordered_prompt(story_point)
+        decision = input(prompt + "\n").lower()
+
+        if story_point == Choice.START:
+            clear_logfile()
+        log_prompt_or_decision(prompt)
+        log_prompt_or_decision(decision)
+
+        index = -1
+        clear_terminal()
+
+        if decision in lower_choice_values:
+            index = lower_choice_values.index(decision)
+        elif decision.isdigit():
+            index = int(decision) - 1
+
+        
+        if index >= 0:
+            current_story_point = choices[index]
+            prompt_user(current_story_point)
+        else:
+            prompt_user(story_point)
 
 
 def begin_adventure() -> None:
     prompt_user(current_story_point)
 
-def print_pretty(arr: list) -> None:
-    for value in arr:
-        print(value)
+LOGFILE_PATH = "logfile.txt"
+
+def clear_logfile() -> None:
+    logfile = open(LOGFILE_PATH, "w")
+    logfile.close()
+
+def log_prompt_or_decision(prompt_or_decision: str) -> None:
+    logfile = open(LOGFILE_PATH, "a")
+    logfile.write(prompt_or_decision + "\n")
+    logfile.close()
 
 def main() -> None:
     clear_terminal()
